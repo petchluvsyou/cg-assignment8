@@ -141,11 +141,11 @@ impl State {
 
         let high_res_texture_view = high_res_texture.create_view(&wgpu::TextureViewDescriptor::default());
 
-        // TODO: Create the compute bind group
-        // This connects the shader's @group(0) bindings to actual GPU resources
-        // You need to bind:
-        //   - binding 0: view_params_buffer (uniform buffer with view parameters)
-        //   - binding 1: high_res_texture_view (storage texture for output)
+    // Create the compute bind group
+    // This connects the shader's @group(0) bindings to actual GPU resources
+    // Bindings:
+    //   - binding 0: view_params_buffer (uniform buffer with view parameters)
+    //   - binding 1: high_res_texture_view (storage texture for output)
         let compute_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some("Compute Bind Group"),
             layout: &compute_bind_group_layout,
@@ -161,8 +161,8 @@ impl State {
             ],
         });
 
-        // TODO: Create the compute pipeline layout
-        // This defines the overall structure of bind groups used by the pipeline
+    // Create the compute pipeline layout
+    // This defines the overall structure of bind groups used by the pipeline
         let compute_pipeline_layout =
             device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: Some("Compute Pipeline Layout"),
@@ -401,25 +401,24 @@ impl State {
             bytemuck::bytes_of(&self.view_params),
         );
 
-        // TODO: Execute the compute shader on the GPU
-        // Step 1: Create a command encoder to record GPU commands
+    // Execute the compute shader on the GPU
+    // Step 1: Create a command encoder to record GPU commands
         let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: Some("Compute Encoder") });
 
         // Step 2: Begin a compute pass (this is where compute shaders run)
         let mut compute_pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: Some("Compute Pass"), ..Default::default() });
 
-        // TODO: Set the compute pipeline and bind group
-        // Hint: Use compute_pass.set_pipeline() and compute_pass.set_bind_group()
+    // Set the compute pipeline and bind group
         compute_pass.set_pipeline(&self.compute_pipeline);
         compute_pass.set_bind_group(0, &self.compute_bind_group, &[]);
 
-        // TODO: Calculate the number of workgroups needed
-        // The compute shader uses @workgroup_size(8, 8, 1)
-        // We need enough workgroups to cover the entire screen
+    // Calculate the number of workgroups needed
+    // The compute shader uses @workgroup_size(8, 8, 1)
+    // We need enough workgroups to cover the entire screen
         let workgroup_x = (self.size.width as f32 / 8.0).ceil() as u32;
         let workgroup_y = (self.size.height as f32 / 8.0).ceil() as u32;
 
-        // TODO: Dispatch the compute shader with the calculated workgroup counts
+    // Dispatch the compute shader with the calculated workgroup counts
         compute_pass.dispatch_workgroups(workgroup_x, workgroup_y, 1);
 
         // End the compute pass and submit commands to GPU
@@ -517,14 +516,14 @@ fn compute_cpu_preview(params: &ViewParams) -> Vec<u8> {
                 params.center[1] + (norm_y * params.range[1]),
             );
 
-            // TODO: Implement the Mandelbrot iteration on CPU (same logic as GPU shader)
+            // Mandelbrot iteration on CPU (same logic as GPU shader)
             // This provides a quick preview using Rayon for parallel CPU processing
             let (mut z_real, mut z_imag) = (0.0, 0.0);
 
             let mut iterations = 0;
-            // TODO: Implement the while loop to iterate the Mandelbrot formula
+            // Iterate the Mandelbrot formula
             // Same logic as in compute.wgsl: z_{n+1} = z_n^2 + c
-            // Hint: Loop while |z|^2 <= 4.0 and iterations < PREVIEW_ITERATIONS
+            // Loop while |z|^2 <= 4.0 and iterations < PREVIEW_ITERATIONS
             while z_real * z_real + z_imag * z_imag <= 4.0 && iterations < PREVIEW_ITERATIONS {
                 let z_real_new = z_real * z_real - z_imag * z_imag + c_real;
                 z_imag = 2.0 * z_real * z_imag + c_imag;
@@ -532,7 +531,7 @@ fn compute_cpu_preview(params: &ViewParams) -> Vec<u8> {
                 iterations += 1;
             }
 
-            // TODO: Calculate the color based on iteration count (same as GPU shader)
+            // Calculate the color based on iteration count (same as GPU shader)
             let (r, g, b) = if iterations == PREVIEW_ITERATIONS {
                 // In the set - use angle-based coloring
                 let angle = z_imag.atan2(z_real);
